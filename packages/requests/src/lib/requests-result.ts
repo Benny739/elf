@@ -216,13 +216,22 @@ export function trackRequestResult<TData>(
               setWait(key, false);
             },
             error(error) {
-              updateRequestResult(key, {
+              const newResult: Omit<
+                ErrorRequestResult,
+                'successfulRequestsCount'
+              > = {
                 isError: true,
                 isLoading: false,
                 isSuccess: false,
                 status: 'error',
                 error,
-              });
+              };
+
+              if (options?.staleTime) {
+                newResult.staleTime = Date.now() + options.staleTime;
+              }
+
+              updateRequestResult(key, newResult);
             },
             complete() {
               const newResult: SuccessRequestResult = {
